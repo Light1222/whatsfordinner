@@ -1,19 +1,54 @@
-module.exports.viewAll = function(req, res, next) {
-    const restaurants =[ {
-        id: 1,
-        name: 'Pizza Hut',
-        image: 'https://www.meneds.com/school-programs/imgs/logo.png',
-        rating: 4,
-        category: 'Italian',
-        description: 'the best pizza in fresno, hQUIOGHBQERHBQH4RUIGBQERIHBGUBTR VJSDBVYSRTBGYUB'
-    },
-    {   id: 2,
-        name: "Iceskimo",
-        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8YZhHrDUvMUS1CeRMzJ6gIwjx87F_4GJcKqp2n-o5lA&s',
-        rating: 5,
-        category: 'Shaved Ice',
-        description: 'Taiwanese Shaved Ice'
-    }];
+const {Restaurant} = require('../models')
+const categories = ['Pizza', 'Ice-Cream', 'Fast Food'];
+
+module.exports.viewAll = async function(req, res, next) {
+    const restaurants = await Restaurant.findAll();
     res.render('index', {restaurants});
 }
 
+module.exports.renderEditForm = async function(req, res, next){
+    const restaurant = await Restaurant.findByPk(
+        req.params.id
+    );
+    res.render('edit', {restaurant, categories});
+}
+
+module.exports.updateRestaurant = async function(req, res){
+    await Restaurant.update(
+        {
+            name: req.body.name,
+            category: req.body.category,
+            rating: req.body.rating,
+            image: req.body.image,
+            description: req.body.description
+        },
+        {
+            where:
+                {
+                    id: req.params.id
+                }
+        });
+    res.redirect('/')
+}
+
+module.exports.deleteRestaurant = async function(req, res){
+    await Restaurant.destroy(
+        {
+            where:
+                {
+                    id: req.params.id
+                }
+        });
+    res.redirect('/')
+}
+
+module.exports.renderAddForm = function(req, res){
+    const restaurant = {
+        name: "",
+        description: "",
+        rating: 1,
+        image: "",
+        category: categories[0],
+    };
+    res.render('add', {restaurant, categories});
+}
